@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 손코딩 연습</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --accent2: #bc8cff;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --orange: #e3b341;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 60px;
+}
+.header { text-align: center; margin-bottom: 24px; width: 100%; max-width: 860px; }
+.header h1 {
+  font-size: 1.5rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.header p { font-size: 0.8rem; color: var(--muted); }
+
+/* 문제 목록 */
+.problem-list {
+  display: flex; flex-direction: column; gap: 8px;
+  width: 100%; max-width: 860px; margin-bottom: 20px;
+}
+.problem-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px;
+  cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; gap: 14px;
+}
+.problem-item:hover { border-color: var(--accent); background: rgba(88,166,255,.05); }
+.problem-item.active { border-color: var(--accent); background: rgba(88,166,255,.08); }
+.problem-item.done-ok { border-color: var(--green); }
+.problem-item.done-fail { border-color: var(--red); }
+.prob-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  color: var(--accent); background: rgba(88,166,255,.1);
+  border: 1px solid rgba(88,166,255,.2); border-radius: 6px;
+  padding: 2px 8px; min-width: 36px; text-align: center;
+}
+.prob-title { font-size: 0.92rem; font-weight: 500; flex: 1; }
+.prob-tag {
+  font-size: 0.7rem; padding: 2px 8px; border-radius: 99px;
+  background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
+}
+.prob-status { font-size: 0.85rem; }
+
+/* 문제 카드 */
+.problem-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px 20px;
+  width: 100%; max-width: 860px; display: none;
+}
+.problem-card.show { display: block; }
+.card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.card-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  background: var(--surface2); color: var(--accent);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 3px 10px; white-space: nowrap;
+}
+.card-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
+
+.problem-desc {
+  background: var(--surface2); border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 12px 14px;
+  font-size: 0.88rem; line-height: 1.75; margin-bottom: 18px;
+  white-space: pre-wrap; word-break: keep-all;
+}
+
+/* 코드 에디터 */
+.editor-label {
+  font-size: 0.78rem; color: var(--muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.editor-label span { color: var(--accent); }
+.code-editor {
+  width: 100%; background: #010409; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  color: #e6edf3; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem; line-height: 1.7; resize: vertical;
+  min-height: 240px; outline: none; tab-size: 4;
+  transition: border-color .15s;
+}
+.code-editor:focus { border-color: var(--accent); }
+
+/* 버튼 */
+.btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn {
+  padding: 9px 20px; border-radius: var(--radius);
+  font-size: 0.88rem; font-family: inherit; cursor: pointer;
+  border: 1px solid var(--border); transition: all .15s; font-weight: 500;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--accent); color: #000; border-color: transparent; }
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+.btn-ghost { background: var(--surface2); color: var(--muted); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+.btn-answer { background: rgba(188,140,255,.1); color: var(--accent2); border-color: rgba(188,140,255,.3); }
+.btn-answer:hover { background: rgba(188,140,255,.18); }
+
+/* AI 피드백 */
+.feedback-box {
+  margin-top: 18px; border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden; display: none;
+}
+.feedback-box.show { display: block; }
+.feedback-header {
+  padding: 10px 14px; font-size: 0.8rem; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.feedback-header.loading { background: rgba(88,166,255,.08); color: var(--accent); border-bottom: 1px solid var(--border); }
+.feedback-header.ok { background: rgba(63,185,80,.08); color: var(--green); border-bottom: 1px solid rgba(63,185,80,.2); }
+.feedback-header.fail { background: rgba(248,81,73,.08); color: var(--red); border-bottom: 1px solid rgba(248,81,73,.2); }
+.feedback-header.partial { background: rgba(210,153,34,.08); color: var(--orange); border-bottom: 1px solid rgba(210,153,34,.2); }
+.feedback-body {
+  padding: 14px 16px; font-size: 0.87rem; line-height: 1.8;
+  white-space: pre-wrap; word-break: keep-all;
+  background: var(--surface2);
+}
+.spinner {
+  width: 14px; height: 14px; border: 2px solid rgba(88,166,255,.3);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 정답 코드 */
+.answer-box {
+  margin-top: 14px; display: none;
+}
+.answer-box.show { display: block; }
+.answer-label {
+  font-size: 0.78rem; color: var(--muted); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.answer-code {
+  background: #010409; border: 1px solid rgba(188,140,255,.25);
+  border-radius: var(--radius); padding: 14px 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  line-height: 1.7; color: #e6edf3; white-space: pre; overflow-x: auto;
+}
+
+/* 탭 키 처리 안내 */
+.tab-hint { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Java 손코딩 연습</h1>
+  <p>문제를 읽고 직접 코드를 작성하세요 — AI가 즉시 피드백을 줍니다</p>
+</div>
+
+<div class="problem-list" id="problem-list"></div>
+<div id="problem-card" class="problem-card"></div>
+
+<script>
+const PROBLEMS = [
+  {
+    id: 1,
+    title: "홀수/짝수 사칙연산",
+    tag: "조건문",
+    desc: `두 정수에서, 한 개는 홀수(num1), 나머지 한 개는 짝수(num2)일 때
+사칙 연산(+, -, *, /)을 계산하여 출력하시오.
+
+- args[0]: 홀수, args[1]: 짝수
+- num1 % 2 == 1 && num2 % 2 == 0 일 때만 출력`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        int num1 = Integer.parseInt(args[0]);
+        int num2 = Integer.parseInt(args[1]);
+        if (num1 % 2 == 1 && num2 % 2 == 0) {
+            System.out.println(num1 + num2);
+            System.out.println(num1 - num2);
+            System.out.println(num1 * num2);
+            System.out.println(num1 / num2);
+        }
+    }
+}`,
+    hint: "args[]로 입력받고, if 조건문으로 홀수/짝수 체크 후 사칙연산 출력"
+  },
+  {
+    id: 2,
+    title: "매개변수 사칙연산 (switch)",
+    tag: "switch",
+    desc: `매개변수로 "3 + 4" 형태로 입력받은 후, switch를 사용하여 사칙연산 결과를 출력하시오.
+
+- args[0]: 첫 번째 정수
+- args[1]: 연산자 (+, -, *, /)
+- args[2]: 두 번째 정수
+- 출력 형식: result = 7`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        int num1 = Integer.parseInt(args[0]);
+        String operator = args[1];
+        int num2 = Integer.parseInt(args[2]);
+        int result = switch (operator) {
+            case "+" -> num1 + num2;
+            case "-" -> num1 - num2;
+            case "*" -> num1 * num2;
+            case "/" -> num1 / num2;
+            default -> -1;
+        };
+        System.out.println("result = " + result);
+    }
+}`,
+    hint: "args[1]로 연산자 String을 받고, switch expression(->)으로 처리"
+  },
+  {
+    id: 3,
+    title: "월 이름 출력 (switch)",
+    tag: "switch",
+    desc: `매개변수로 숫자(0~11)를 입력받아 switch를 사용하여 월의 영어 이름을 출력하시오.
+
+- 0 → January, 1 → February, ..., 11 → December
+- 그 외 → ???
+- 출력 형식: Season = January`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        int seasonCode = Integer.parseInt(args[0]);
+        String seasonname = switch (seasonCode) {
+            case 0 -> "January";
+            case 1 -> "February";
+            case 2 -> "March";
+            case 3 -> "April";
+            case 4 -> "May";
+            case 5 -> "June";
+            case 6 -> "July";
+            case 7 -> "August";
+            case 8 -> "September";
+            case 9 -> "October";
+            case 10 -> "November";
+            case 11 -> "December";
+            default -> "???";
+        };
+        System.out.println("Season = " + seasonname);
+    }
+}`,
+    hint: "switch expression으로 0~11 각 case에 월 이름 매핑"
+  },
+  {
+    id: 4,
+    title: "문자열 처리 — 자기소개 출력",
+    tag: "String",
+    desc: `args로 이름(String), 나이(int), 목표나이(int)를 입력받아 아래 형식으로 출력하시오.
+
+출력 예시:
+안녕하세요, 제 이름은 홍길동 이고, 나이는 20입니다. 내년에는 21 살이 됩니다!`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        String name = args[0];
+        int age = Integer.parseInt(args[1]);
+        int goal = Integer.parseInt(args[2]);
+        System.out.println("안녕하세요, 제 이름은 " + name + " 이고, 나이는 " + age + "입니다. 내년에는 " + goal + " 살이 됩니다!");
+    }
+}`,
+    hint: "args[0]은 String 그대로, args[1]과 args[2]는 parseInt로 변환"
+  },
+  {
+    id: 5,
+    title: "문자열 처리 — 이메일 파싱",
+    tag: "String",
+    desc: `이메일 주소 "java_user@cju.ac.kr" 에서 @ 앞부분(username)만 추출하여 출력하시오.
+
+- indexOf()로 @ 위치 찾기
+- substring()으로 앞부분 추출
+- 출력: java_user`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        String email = "java_user@cju.ac.kr";
+        int position = email.indexOf("@");
+        String username = email.substring(0, position);
+        System.out.println(username);
+    }
+}`,
+    hint: "indexOf()로 @의 인덱스를 구하고, substring(0, position)으로 잘라내기"
+  },
+  {
+    id: 6,
+    title: "문자열 처리 — 패스워드 비교",
+    tag: "String",
+    desc: `두 패스워드 문자열을 비교하여 일치 여부를 출력하시오.
+
+- pass1 = "abcde", pass2 = "abcde"
+- 주의: 문자열 비교 시 == 와 equals()의 차이를 고려하시오
+- 일치하면 "패스워드가 일치합니다.", 아니면 "패스워드가 불일치합니다."`,
+    answer: `public class Main {
+    public static void main(String[] args) {
+        String pass1 = "abcde";
+        String pass2 = "abcde";
+        if (pass1.equals(pass2)) {
+            System.out.println("패스워드가 일치합니다.");
+        } else {
+            System.out.println("패스워드가 불일치합니다.");
+        }
+    }
+}`,
+    hint: "String 비교는 == 가 아니라 .equals()를 써야 정확합니다!"
+  },
+  {
+    id: 7,
+    title: "조건문 — 5의 배수 판별",
+    tag: "조건문",
+    desc: `Scanner로 정수 하나를 입력받아 5의 배수인지 확인하여 출력하시오.
+
+- % 연산자 사용 필수
+- 5의 배수면 "5의 배수 입니다.", 아니면 "5의 배수가 아닙니다."`,
+    answer: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("정수 입력 :");
+        int num = sc.nextInt();
+        if (num % 5 == 0) {
+            System.out.println("5의 배수 입니다.");
+        } else {
+            System.out.println("5의 배수가 아닙니다.");
+        }
+    }
+}`,
+    hint: "Scanner import 필수, sc.nextInt()로 입력, % 5 == 0 으로 판별"
+  },
+  {
+    id: 8,
+    title: "조건문 — 학점 출력",
+    tag: "조건문",
+    desc: `Scanner로 0~4.5 사이의 실수 점수를 입력받아 학점을 출력하시오.
+
+- 4.0 이상 → A
+- 3.0 이상 → B
+- 2.0 이상 → C
+- 그 외 → F`,
+    answer: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("학점 입력 :");
+        double num = sc.nextDouble();
+        if (num >= 4.0) {
+            System.out.println("A");
+        } else if (num >= 3.0) {
+            System.out.println("B");
+        } else if (num >= 2.0) {
+            System.out.println("C");
+        } else {
+            System.out.println("F");
+        }
+    }
+}`,
+    hint: "실수 입력은 double + sc.nextDouble(), if-else if 체인으로 구현"
+  },
+  {
+    id: 9,
+    title: "조건문 — 버스 요금 계산",
+    tag: "조건문",
+    desc: `Scanner로 나이를 입력받아 버스 요금을 출력하시오.
+
+- 8세 미만 또는 65세 이상 → 무료
+- 8세 이상 ~ 19세 이하 → 700원
+- 20세 이상 ~ 64세 이하 → 1200원`,
+    answer: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("나이 입력 :");
+        int age = sc.nextInt();
+        if (age >= 65 || age < 8) {
+            System.out.println("무료");
+        } else if (age >= 8 && age < 20) {
+            System.out.println("700원");
+        } else {
+            System.out.println("1200원");
+        }
+    }
+}`,
+    hint: "|| (또는) 조건으로 무료 범위 처리, else if로 청소년/성인 구분"
+  },
+  {
+    id: 10,
+    title: "반복문 — 1~9 숫자만 입력받기",
+    tag: "반복문",
+    desc: `while문을 사용하여 사용자가 1~9 사이의 숫자를 올바르게 입력할 때까지 반복하시오.
+
+- 범위를 벗어나면 "[경고] 범위를 벗어났습니다. 다시 시도해주세요." 출력
+- 성공하면 "성공! 올바르게 입력하신 숫자는 N입니다." 출력`,
+    answer: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int num = 0;
+        while (num < 1 || num > 9) {
+            System.out.println("1부터 9 사이의 숫자를 입력하세요:");
+            num = scanner.nextInt();
+            if (num < 1 || num > 9) {
+                System.out.print("[경고] 범위를 벗어났습니다. 다시 시도해주세요.\n\n");
+            }
+        }
+        System.out.println("성공! 올바르게 입력하신 숫자는 " + num + "입니다.");
+    }
+}`,
+    hint: "while 조건을 (num < 1 || num > 9)로 설정, 루프 안에서 재입력받기"
+  },
+  {
+    id: 11,
+    title: "반복문 — 5x5 보물 지도",
+    tag: "이중 반복문",
+    desc: `Scanner로 보물의 행(row)과 열(col) 위치(1~5)를 입력받고, 5x5 지도를 출력하시오.
+
+- 보물 위치는 [★], 나머지는 [ ]로 표시
+- while문 중첩(이중 반복문) 사용
+- 출력 예시 (row=2, col=3):
+  [ ][ ][★][ ][ ]`,
+    answer: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("보물의 위치를 설정합니다. (1 ~ 5 사이)");
+        System.out.println("보물의 행(Row)위치");
+        int targetRow = sc.nextInt();
+        System.out.println("보물의 열(Col) 위치");
+        int targetCol = sc.nextInt();
+        System.out.println(" === 5 x 5 보물 지도");
+        int row = 1;
+        while (row <= 5) {
+            int col = 1;
+            while (col <= 5) {
+                if (row == targetRow && col == targetCol) {
+                    System.out.print("[★]");
+                } else {
+                    System.out.print("[ ]");
+                }
+                col++;
+            }
+            System.out.println();
+            row++;
+        }
+        sc.close();
+    }
+}`,
+    hint: "while 안에 while (이중 반복문), 행 루프 끝에 println()으로 줄바꿈"
+  }
+];
+
+let currentProblem = null;
+let answerVisible = {};
+let feedbackState = {};
+
+function renderList() {
+  const list = document.getElementById('problem-list');
+  list.innerHTML = PROBLEMS.map(p => `
+    <div class="problem-item ${currentProblem?.id === p.id ? 'active' : ''} ${feedbackState[p.id] === 'ok' ? 'done-ok' : feedbackState[p.id] === 'fail' ? 'done-fail' : ''}"
+         onclick="selectProblem(${p.id})">
+      <span class="prob-num">${String(p.id).padStart(2,'0')}</span>
+      <span class="prob-title">${p.title}</span>
+      <span class="prob-tag">${p.tag}</span>
+      <span class="prob-status">
+        ${feedbackState[p.id] === 'ok' ? '✅' : feedbackState[p.id] === 'fail' ? '❌' : feedbackState[p.id] === 'partial' ? '🟡' : ''}
+      </span>
+    </div>
+  `).join('');
+}
+
+function selectProblem(id) {
+  currentProblem = PROBLEMS.find(p => p.id === id);
+  renderList();
+  renderCard();
+  document.getElementById('problem-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderCard() {
+  const p = currentProblem;
+  if (!p) return;
+  const card = document.getElementById('problem-card');
+  card.className = 'problem-card show';
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-badge">문제 ${String(p.id).padStart(2,'0')} · ${p.tag}</span>
+      <span class="card-title">${p.title}</span>
+    </div>
+    <div class="problem-desc">${p.desc}</div>
+
+    <div class="editor-label">✏️ 여기에 코드를 직접 작성하세요 <span>(Tab키 = 들여쓰기)</span></div>
+    <textarea class="code-editor" id="code-input-${p.id}" placeholder="public class Main {&#10;    public static void main(String[] args) {&#10;        // 여기에 코드 작성&#10;    }&#10;}" spellcheck="false"></textarea>
+    <div class="tab-hint">💡 Tab 키를 누르면 4칸 들여쓰기, Shift+Tab은 내어쓰기</div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check-${p.id}" onclick="checkCode(${p.id})">🤖 AI 채점하기</button>
+      <button class="btn btn-answer" onclick="toggleAnswer(${p.id})">📋 모범답안 보기</button>
+      <button class="btn btn-ghost" onclick="clearCode(${p.id})">초기화</button>
+    </div>
+
+    <div class="feedback-box" id="feedback-${p.id}"></div>
+    <div class="answer-box ${answerVisible[p.id] ? 'show' : ''}" id="answer-${p.id}">
+      <div class="answer-label">📋 모범답안</div>
+      <pre class="answer-code">${escHtml(p.answer)}</pre>
+    </div>
+  `;
+
+  // Tab key handler
+  const editor = document.getElementById(`code-input-${p.id}`);
+  editor.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      if (e.shiftKey) {
+        const lineStart = this.value.lastIndexOf('\n', start - 1) + 1;
+        if (this.value.substring(lineStart, lineStart + 4) === '    ') {
+          this.value = this.value.substring(0, lineStart) + this.value.substring(lineStart + 4);
+          this.selectionStart = this.selectionEnd = start - 4;
+        }
+      } else {
+        this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 4;
+      }
+    }
+  });
+
+  // Restore saved code
+  const saved = localStorage.getItem ? (localStorage.getItem(`code_${p.id}`) || '') : '';
+  if (saved) editor.value = saved;
+
+  // Auto-save
+  editor.addEventListener('input', function() {
+    try { localStorage.setItem(`code_${p.id}`, this.value); } catch(e) {}
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function clearCode(id) {
+  const editor = document.getElementById(`code-input-${id}`);
+  if (editor) editor.value = '';
+  try { localStorage.removeItem(`code_${id}`); } catch(e) {}
+  document.getElementById(`feedback-${id}`).className = 'feedback-box';
+  document.getElementById(`feedback-${id}`).innerHTML = '';
+}
+
+function toggleAnswer(id) {
+  answerVisible[id] = !answerVisible[id];
+  const box = document.getElementById(`answer-${id}`);
+  if (box) box.className = 'answer-box ' + (answerVisible[id] ? 'show' : '');
+}
+
+async function checkCode(id) {
+  const p = PROBLEMS.find(x => x.id === id);
+  const editor = document.getElementById(`code-input-${id}`);
+  const userCode = editor?.value?.trim();
+  if (!userCode) { alert('코드를 먼저 작성해주세요!'); return; }
+
+  const fbBox = document.getElementById(`feedback-${id}`);
+  const btn = document.getElementById(`btn-check-${id}`);
+  btn.disabled = true;
+
+  fbBox.className = 'feedback-box show';
+  fbBox.innerHTML = `
+    <div class="feedback-header loading">
+      <span class="spinner"></span> AI가 코드를 분석하고 있어요...
+    </div>
+    <div class="feedback-body" style="color:var(--muted)">잠시만 기다려주세요.</div>
+  `;
+
+  const prompt = `당신은 Java 프로그래밍 강사입니다. 학생이 작성한 Java 코드를 꼼꼼히 채점해주세요.
+
+[문제]
+${p.title}
+
+[문제 설명]
+${p.desc}
+
+[모범답안]
+\`\`\`java
+${p.answer}
+\`\`\`
+
+[학생 코드]
+\`\`\`java
+${userCode}
+\`\`\`
+
+다음 기준으로 분석해주세요:
+
+1. **전체 판정**: 정답 / 부분 정답 / 오답 중 하나로 시작
+2. **논리 오류**: 알고리즘이나 조건문 로직이 잘못된 부분
+3. **문법 오류**: 세미콜론 누락, 괄호 오류, 타입 선언 등
+4. **Java 특이사항**: String 비교, import 누락, 타입 불일치 등
+5. **개선 제안**: 더 좋은 방법이 있다면 간단히
+
+손코딩 시험 기준으로 엄격하게, 하지만 친절하게 피드백해주세요.
+줄 번호를 언급할 때는 "X번째 줄"처럼 구체적으로 알려주세요.
+한국어로 답변해주세요.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '응답을 받지 못했습니다.';
+
+    const isOk = text.includes('정답') && !text.includes('오답') && !text.includes('부분 정답');
+    const isPartial = text.includes('부분 정답');
+    const statusClass = isOk ? 'ok' : isPartial ? 'partial' : 'fail';
+    const statusIcon = isOk ? '✅ 정답입니다!' : isPartial ? '🟡 부분 정답' : '❌ 오답 또는 수정 필요';
+
+    feedbackState[id] = statusClass;
+    renderList();
+
+    fbBox.innerHTML = `
+      <div class="feedback-header ${statusClass}">${statusIcon}</div>
+      <div class="feedback-body">${escHtml(text)}</div>
+    `;
+  } catch (err) {
+    fbBox.innerHTML = `
+      <div class="feedback-header fail">⚠️ 오류 발생</div>
+      <div class="feedback-body">AI 연결에 실패했습니다. 잠시 후 다시 시도해주세요.\n${err.message}</div>
+    `;
+  }
+
+  btn.disabled = false;
+}
+
+// Init
+renderList();
+</script>
+</body>
+</html>
