@@ -1,666 +1,427 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Java 손코딩 연습</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>임현규 — hkacedia</title>
+<meta name="description" content="임현규(LIM HYUN KYU) · 청주대 · 리눅스 서버, 데이터베이스, 백엔드를 공부하는 개발자">
+<meta property="og:title" content="임현규 — hkacedia">
+<meta property="og:description" content="리눅스 서버, 데이터베이스, 백엔드를 공부하는 개발자">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-:root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --surface2: #21262d;
-  --border: #30363d;
-  --accent: #58a6ff;
-  --accent2: #bc8cff;
-  --green: #3fb950;
-  --red: #f85149;
-  --yellow: #d29922;
-  --orange: #e3b341;
-  --text: #e6edf3;
-  --muted: #7d8590;
-  --radius: 10px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans KR', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 16px 60px;
-}
-.header { text-align: center; margin-bottom: 24px; width: 100%; max-width: 860px; }
-.header h1 {
-  font-size: 1.5rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 4px;
-}
-.header p { font-size: 0.8rem; color: var(--muted); }
+  :root{
+    --bg:#e8eaed; --surface:#f7f8fa; --surface-2:#eef0f3;
+    --ink:#15171b; --muted:#5f646c; --faint:#9a9ea6;
+    --line:#d3d7dd; --line-strong:#bcc2ca;
+    --accent:#c8501f; --accent-ink:#a53f14; --accent-soft:#f6e6dd;
+    --good:#2f7d5b; --shadow:0 1px 2px rgba(20,25,35,.05), 0 10px 30px rgba(20,25,35,.07);
+    --maxw:1080px;
+    --f-display:"Bricolage Grotesque", "Pretendard", system-ui, sans-serif;
+    --f-body:"IBM Plex Sans", "Malgun Gothic", system-ui, sans-serif;
+    --f-mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#101216; --surface:#181b21; --surface-2:#1f232a;
+      --ink:#e9ebef; --muted:#9aa0a9; --faint:#666c76;
+      --line:#262a31; --line-strong:#353a43;
+      --accent:#e8703f; --accent-ink:#f0855a; --accent-soft:#2a1a12;
+      --good:#54c08a; --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#101216; --surface:#181b21; --surface-2:#1f232a;
+    --ink:#e9ebef; --muted:#9aa0a9; --faint:#666c76;
+    --line:#262a31; --line-strong:#353a43;
+    --accent:#e8703f; --accent-ink:#f0855a; --accent-soft:#2a1a12;
+    --good:#54c08a; --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px rgba(0,0,0,.5);
+  }
 
-/* 문제 목록 */
-.problem-list {
-  display: flex; flex-direction: column; gap: 8px;
-  width: 100%; max-width: 860px; margin-bottom: 20px;
-}
-.problem-item {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 18px;
-  cursor: pointer; transition: all .15s;
-  display: flex; align-items: center; gap: 14px;
-}
-.problem-item:hover { border-color: var(--accent); background: rgba(88,166,255,.05); }
-.problem-item.active { border-color: var(--accent); background: rgba(88,166,255,.08); }
-.problem-item.done-ok { border-color: var(--green); }
-.problem-item.done-fail { border-color: var(--red); }
-.prob-num {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
-  color: var(--accent); background: rgba(88,166,255,.1);
-  border: 1px solid rgba(88,166,255,.2); border-radius: 6px;
-  padding: 2px 8px; min-width: 36px; text-align: center;
-}
-.prob-title { font-size: 0.92rem; font-weight: 500; flex: 1; }
-.prob-tag {
-  font-size: 0.7rem; padding: 2px 8px; border-radius: 99px;
-  background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
-}
-.prob-status { font-size: 0.85rem; }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--f-body); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  a{color:inherit}
+  ::selection{background:var(--accent); color:#fff}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
 
-/* 문제 카드 */
-.problem-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 22px 20px;
-  width: 100%; max-width: 860px; display: none;
-}
-.problem-card.show { display: block; }
-.card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-.card-badge {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-  background: var(--surface2); color: var(--accent);
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 3px 10px; white-space: nowrap;
-}
-.card-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding-inline:24px}
+  .mono{font-family:var(--f-mono)}
+  .label{font-family:var(--f-mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
 
-.problem-desc {
-  background: var(--surface2); border-left: 3px solid var(--accent);
-  border-radius: 0 8px 8px 0; padding: 12px 14px;
-  font-size: 0.88rem; line-height: 1.75; margin-bottom: 18px;
-  white-space: pre-wrap; word-break: keep-all;
-}
+  /* ---- top nav ---- */
+  header.nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  .nav-in{max-width:var(--maxw); margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:20px}
+  .brand{font-family:var(--f-mono); font-weight:500; font-size:14px; letter-spacing:.02em; display:flex; align-items:center; gap:8px}
+  .brand .dot{width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+  .nav-links{margin-left:auto; display:flex; gap:22px; align-items:center}
+  .nav-links a{font-family:var(--f-mono); font-size:13px; color:var(--muted); text-decoration:none; transition:color .15s}
+  .nav-links a:hover, .nav-links a.active{color:var(--ink)}
+  @media(max-width:640px){ .nav-links a.hideable{display:none} }
+  .tgl{background:none; border:1px solid var(--line-strong); color:var(--muted); width:34px; height:34px; border-radius:9px; cursor:pointer; font-size:15px; display:grid; place-items:center; transition:.15s}
+  .tgl:hover{color:var(--ink); border-color:var(--ink)}
 
-/* 코드 에디터 */
-.editor-label {
-  font-size: 0.78rem; color: var(--muted); margin-bottom: 8px;
-  display: flex; align-items: center; gap: 6px;
-}
-.editor-label span { color: var(--accent); }
-.code-editor {
-  width: 100%; background: #010409; border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 16px;
-  color: #e6edf3; font-family: 'JetBrains Mono', monospace;
-  font-size: 0.88rem; line-height: 1.7; resize: vertical;
-  min-height: 240px; outline: none; tab-size: 4;
-  transition: border-color .15s;
-}
-.code-editor:focus { border-color: var(--accent); }
+  /* ---- hero ---- */
+  .hero{padding-block:clamp(56px,10vw,104px) clamp(40px,6vw,64px)}
+  .hero .kick{margin:0 0 18px}
+  .hero h1{font-family:var(--f-display); font-weight:800; font-size:clamp(46px,11vw,104px); line-height:.94; letter-spacing:-.03em; margin:0; text-wrap:balance}
+  .hero h1 .en{display:block; color:var(--muted); font-weight:700; font-size:clamp(18px,3.2vw,30px); letter-spacing:.02em; margin-top:16px}
+  .hero .tag{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:46ch; margin:26px 0 0; line-height:1.5}
+  .hero .tag b{color:var(--ink); font-weight:600}
 
-/* 버튼 */
-.btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.btn {
-  padding: 9px 20px; border-radius: var(--radius);
-  font-size: 0.88rem; font-family: inherit; cursor: pointer;
-  border: 1px solid var(--border); transition: all .15s; font-weight: 500;
-}
-.btn:active { transform: scale(.97); }
-.btn-primary { background: var(--accent); color: #000; border-color: transparent; }
-.btn-primary:hover { opacity: .85; }
-.btn-primary:disabled { opacity: .4; cursor: default; }
-.btn-ghost { background: var(--surface2); color: var(--muted); }
-.btn-ghost:hover { color: var(--text); border-color: var(--accent); }
-.btn-answer { background: rgba(188,140,255,.1); color: var(--accent2); border-color: rgba(188,140,255,.3); }
-.btn-answer:hover { background: rgba(188,140,255,.18); }
+  /* ---- spec strip (systems detail) ---- */
+  .spec{margin-top:38px; border:1px solid var(--line); border-radius:14px; background:var(--surface);
+    display:grid; grid-template-columns:repeat(4,1fr); overflow:hidden; box-shadow:var(--shadow)}
+  .spec > div{padding:16px 18px; border-right:1px solid var(--line)}
+  .spec > div:last-child{border-right:0}
+  .spec dt{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin:0 0 7px}
+  .spec dd{margin:0; font-family:var(--f-mono); font-size:13.5px; color:var(--ink); font-variant-numeric:tabular-nums}
+  .spec dd .live{color:var(--good)}
+  @media(max-width:720px){ .spec{grid-template-columns:repeat(2,1fr)} .spec > div:nth-child(2){border-right:0} .spec > div:nth-child(1),.spec > div:nth-child(2){border-bottom:1px solid var(--line)} }
 
-/* AI 피드백 */
-.feedback-box {
-  margin-top: 18px; border-radius: var(--radius);
-  border: 1px solid var(--border); overflow: hidden; display: none;
-}
-.feedback-box.show { display: block; }
-.feedback-header {
-  padding: 10px 14px; font-size: 0.8rem; font-weight: 600;
-  display: flex; align-items: center; gap: 8px;
-}
-.feedback-header.loading { background: rgba(88,166,255,.08); color: var(--accent); border-bottom: 1px solid var(--border); }
-.feedback-header.ok { background: rgba(63,185,80,.08); color: var(--green); border-bottom: 1px solid rgba(63,185,80,.2); }
-.feedback-header.fail { background: rgba(248,81,73,.08); color: var(--red); border-bottom: 1px solid rgba(248,81,73,.2); }
-.feedback-header.partial { background: rgba(210,153,34,.08); color: var(--orange); border-bottom: 1px solid rgba(210,153,34,.2); }
-.feedback-body {
-  padding: 14px 16px; font-size: 0.87rem; line-height: 1.8;
-  white-space: pre-wrap; word-break: keep-all;
-  background: var(--surface2);
-}
-.spinner {
-  width: 14px; height: 14px; border: 2px solid rgba(88,166,255,.3);
-  border-top-color: var(--accent); border-radius: 50%;
-  animation: spin .7s linear infinite; display: inline-block;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+  /* ---- section frame ---- */
+  section.block{padding-block:clamp(46px,7vw,88px); border-top:1px solid var(--line)}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin:0 0 30px}
+  .sec-head .idx{font-family:var(--f-mono); font-size:12px; color:var(--accent)}
+  .sec-head h2{font-family:var(--f-display); font-weight:700; font-size:clamp(24px,4vw,34px); letter-spacing:-.02em; margin:0}
 
-/* 정답 코드 */
-.answer-box {
-  margin-top: 14px; display: none;
-}
-.answer-box.show { display: block; }
-.answer-label {
-  font-size: 0.78rem; color: var(--muted); margin-bottom: 6px;
-  display: flex; align-items: center; gap: 6px;
-}
-.answer-code {
-  background: #010409; border: 1px solid rgba(188,140,255,.25);
-  border-radius: var(--radius); padding: 14px 16px;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
-  line-height: 1.7; color: #e6edf3; white-space: pre; overflow-x: auto;
-}
+  /* ---- about ---- */
+  .about-grid{display:grid; grid-template-columns:1.4fr 1fr; gap:44px}
+  @media(max-width:760px){ .about-grid{grid-template-columns:1fr; gap:28px} }
+  .prose p{margin:0 0 16px; color:var(--ink); max-width:60ch}
+  .prose p.lead{font-size:19px}
+  .prose .muted{color:var(--muted)}
+  .facts{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line)}
+  .facts .row{display:flex; justify-content:space-between; gap:16px; padding:13px 0; border-bottom:1px solid var(--line)}
+  .facts .row .k{font-family:var(--f-mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .facts .row .v{font-size:14px; text-align:right}
 
-/* 탭 키 처리 안내 */
-.tab-hint { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+  /* ---- focus / now cards ---- */
+  .now{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  @media(max-width:760px){ .now{grid-template-columns:1fr} }
+  .now-card{border:1px solid var(--line); border-radius:14px; padding:22px 20px; background:var(--surface); display:flex; flex-direction:column; gap:10px}
+  .now-card .n{font-family:var(--f-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+  .now-card h3{font-family:var(--f-display); font-weight:700; font-size:19px; margin:0; letter-spacing:-.01em}
+  .now-card p{margin:0; font-size:14.5px; color:var(--muted); line-height:1.55}
+
+  /* ---- projects ---- */
+  .repos{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+  @media(max-width:680px){ .repos{grid-template-columns:1fr} }
+  .repo{display:flex; flex-direction:column; gap:12px; border:1px solid var(--line); border-radius:14px; padding:20px; background:var(--surface); text-decoration:none; color:inherit; transition:border-color .18s, transform .18s, box-shadow .18s}
+  .repo:hover{border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow)}
+  .repo .top{display:flex; align-items:center; gap:9px}
+  .repo .top svg{width:17px; height:17px; color:var(--muted); flex:none}
+  .repo .name{font-family:var(--f-mono); font-weight:500; font-size:15px; color:var(--ink); word-break:break-word}
+  .repo .desc{font-size:14px; color:var(--muted); line-height:1.5; flex:1; margin:0}
+  .repo .meta{display:flex; gap:16px; align-items:center; font-family:var(--f-mono); font-size:12px; color:var(--faint)}
+  .repo .meta .lang{display:inline-flex; align-items:center; gap:6px}
+  .repo .meta .lang i{width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block}
+  .repo .arrow{margin-left:auto; color:var(--faint); transition:color .18s, transform .18s}
+  .repo:hover .arrow{color:var(--accent); transform:translate(2px,-2px)}
+  .repos-note{font-family:var(--f-mono); font-size:12.5px; color:var(--faint); margin:16px 0 0}
+  .skeleton{border:1px dashed var(--line-strong); border-radius:14px; padding:20px; min-height:120px; display:grid; place-items:center; font-family:var(--f-mono); font-size:13px; color:var(--faint)}
+
+  /* ---- guestbook ---- */
+  .gb-grid{display:grid; grid-template-columns:340px 1fr; gap:36px; align-items:start}
+  @media(max-width:760px){ .gb-grid{grid-template-columns:1fr; gap:26px} }
+  .gb-form{border:1px solid var(--line); border-radius:14px; padding:22px; background:var(--surface); position:sticky; top:88px}
+  @media(max-width:760px){ .gb-form{position:static} }
+  .gb-form .field{display:flex; flex-direction:column; gap:7px; margin-bottom:16px}
+  .gb-form label{font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  .gb-form input, .gb-form textarea{font-family:var(--f-body); font-size:15px; color:var(--ink); background:var(--bg); border:1px solid var(--line-strong); border-radius:9px; padding:11px 13px; width:100%; resize:vertical}
+  .gb-form input:focus, .gb-form textarea:focus{outline:none; border-color:var(--accent)}
+  .gb-form textarea{min-height:92px}
+  .btn{font-family:var(--f-mono); font-size:14px; font-weight:500; background:var(--accent); color:#fff; border:0; border-radius:9px; padding:12px 16px; cursor:pointer; width:100%; transition:background .15s, transform .1s}
+  .btn:hover{background:var(--accent-ink)}
+  .btn:active{transform:translateY(1px)}
+  .gb-hint{font-family:var(--f-mono); font-size:11.5px; color:var(--faint); margin:12px 0 0; line-height:1.5}
+  .gb-list{display:flex; flex-direction:column; gap:0; min-height:120px}
+  .gb-entry{padding:18px 0; border-bottom:1px solid var(--line)}
+  .gb-entry:first-child{padding-top:0}
+  .gb-entry .head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
+  .gb-entry .who{font-weight:600; font-size:15px}
+  .gb-entry .when{font-family:var(--f-mono); font-size:11.5px; color:var(--faint); margin-left:auto; font-variant-numeric:tabular-nums}
+  .gb-entry .msg{margin:0; color:var(--muted); font-size:14.5px; line-height:1.55; white-space:pre-wrap; word-break:break-word}
+  .gb-empty{font-family:var(--f-mono); font-size:13px; color:var(--faint); padding:24px 0}
+
+  /* ---- footer ---- */
+  footer.foot{border-top:1px solid var(--line); padding-block:44px 60px}
+  .foot-in{display:flex; flex-wrap:wrap; gap:20px 40px; align-items:flex-end; justify-content:space-between}
+  .foot .big{font-family:var(--f-display); font-weight:800; font-size:clamp(30px,7vw,64px); letter-spacing:-.03em; line-height:.95; margin:0}
+  .foot .links{display:flex; flex-direction:column; gap:8px}
+  .foot .links a{font-family:var(--f-mono); font-size:13.5px; color:var(--muted); text-decoration:none; transition:color .15s; display:inline-flex; gap:9px; align-items:center}
+  .foot .links a:hover{color:var(--accent)}
+  .foot .copy{width:100%; font-family:var(--f-mono); font-size:11.5px; color:var(--faint); margin-top:14px; padding-top:18px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important; scroll-behavior:auto!important} }
+  html{scroll-behavior:smooth}
+  .reveal{opacity:1}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>Java 손코딩 연습</h1>
-  <p>문제를 읽고 직접 코드를 작성하세요 — AI가 즉시 피드백을 줍니다</p>
-</div>
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top" style="text-decoration:none"><span class="dot" aria-hidden="true"></span>hkacedia.xyz</a>
+    <nav class="nav-links">
+      <a href="#about" class="hideable">소개</a>
+      <a href="#focus" class="hideable">지금</a>
+      <a href="#work">작업</a>
+      <a href="#guestbook">방명록</a>
+      <button class="tgl" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">◐</button>
+    </nav>
+  </div>
+</header>
 
-<div class="problem-list" id="problem-list"></div>
-<div id="problem-card" class="problem-card"></div>
+<main id="top">
+
+  <!-- HERO -->
+  <div class="wrap hero">
+    <p class="label kick">개발 · 리눅스 서버 · 데이터베이스</p>
+    <h1>임현규<span class="en">LIM&nbsp;HYUN&nbsp;KYU · @hkacedia</span></h1>
+    <p class="tag">서버를 <b>바닥부터 직접 세워보며</b> 배우는 걸 좋아합니다. 요즘은 소스 컴파일로 리눅스 웹·DB 서버를 올리고, 그 위에 뭘 붙일 수 있는지 실험 중이에요.</p>
+
+    <dl class="spec" aria-label="현재 상태">
+      <div><dt>Base</dt><dd>Rocky Linux 9.8</dd></div>
+      <div><dt>Stack</dt><dd>Apache · MySQL · PHP</dd></div>
+      <div><dt>Focus</dt><dd>Server / Backend</dd></div>
+      <div><dt>Local time</dt><dd><span class="live" id="clock">--:--:--</span> KST</dd></div>
+    </dl>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="block" id="about">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx">01</span><h2>소개</h2></div>
+      <div class="about-grid">
+        <div class="prose">
+          <p class="lead">충북대학교에서 컴퓨터를 공부하는 학생입니다. 화면에 예쁘게 보이는 것보다, 그 뒤에서 실제로 돌아가는 구조가 더 궁금한 편이에요.</p>
+          <p class="muted">패키지로 한 번에 까는 것도 좋지만, 소스코드부터 <span class="mono" style="font-size:.92em">configure → make → make install</span> 로 직접 빌드해보면서 "왜 이 라이브러리가 필요한지"를 알아가는 과정을 재밌어합니다. 막히면 로그를 읽고, 원인을 찾고, 고칩니다.</p>
+          <p class="muted">지금은 리눅스 서버 운영과 데이터베이스를 파고 있고, 배운 걸 기록하고 작은 것부터 실제로 만들어보려 합니다.</p>
+        </div>
+        <dl class="facts" aria-label="기본 정보">
+          <div class="row"><span class="k">이름</span><span class="v">임현규 (Lim Hyun Kyu)</span></div>
+          <div class="row"><span class="k">소속</span><span class="v">충북대학교</span></div>
+          <div class="row"><span class="k">관심사</span><span class="v">리눅스 · DB · 백엔드</span></div>
+          <div class="row"><span class="k">언어</span><span class="v">Java · SQL · Shell</span></div>
+          <div class="row"><span class="k">GitHub</span><span class="v mono">@hkacedia</span></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOW / FOCUS -->
+  <section class="block" id="focus">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx">02</span><h2>요즘 하는 것</h2></div>
+      <div class="now">
+        <div class="now-card">
+          <span class="n">Now</span>
+          <h3>LAMP 소스 빌드</h3>
+          <p>Rocky Linux 9.8에 Apache·MySQL·PHP를 소스 컴파일로 직접 구축. PCRE·APR 연동, MySQL 인증 방식(caching_sha2)까지 손으로 잡아봤어요.</p>
+        </div>
+        <div class="now-card">
+          <span class="n">Learning</span>
+          <h3>데이터베이스 / SQL</h3>
+          <p>테이블 설계와 SQL 쿼리. PHP와 MySQL을 연동해 방명록 같은 작은 앱을 직접 붙여보는 중.</p>
+        </div>
+        <div class="now-card">
+          <span class="n">Next</span>
+          <h3>배포와 운영</h3>
+          <p>도메인 연결, 정적 호스팅, 그리고 서버를 안정적으로 올려두는 법. 이 사이트도 그 실험의 일부예요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK / GITHUB -->
+  <section class="block" id="work">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx">03</span><h2>작업 · GitHub</h2></div>
+      <div class="repos" id="repos">
+        <div class="skeleton">저장소 불러오는 중…</div>
+        <div class="skeleton">저장소 불러오는 중…</div>
+      </div>
+      <p class="repos-note" id="reposNote"></p>
+    </div>
+  </section>
+
+  <!-- GUESTBOOK -->
+  <section class="block" id="guestbook">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx">04</span><h2>방명록</h2></div>
+      <div class="gb-grid">
+        <form class="gb-form" id="gbForm" autocomplete="off">
+          <div class="field">
+            <label for="gbName">이름</label>
+            <input type="text" id="gbName" name="name" maxlength="20" placeholder="방문자" required>
+          </div>
+          <div class="field">
+            <label for="gbMsg">한마디</label>
+            <textarea id="gbMsg" name="message" maxlength="300" placeholder="다녀갑니다 :)" required></textarea>
+          </div>
+          <button class="btn" type="submit">남기기</button>
+          <p class="gb-hint" id="gbHint">※ 지금은 이 브라우저에만 저장되는 미리보기예요.<br>곧 실제 DB(Supabase)에 연결해 모두에게 보이게 할 예정.</p>
+        </form>
+        <div class="gb-list" id="gbList" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <div class="foot-in">
+      <p class="big">같이 얘기해요.</p>
+      <div class="links">
+        <a href="https://github.com/hkacedia" target="_blank" rel="noopener">↗ github.com/hkacedia</a>
+        <a href="mailto:howpc9900@gmail.com">✉ howpc9900@gmail.com</a>
+        <a href="https://hkacedia.xyz">◎ hkacedia.xyz</a>
+      </div>
+    </div>
+    <div class="copy">
+      <span>© <span id="year">2026</span> 임현규 · Built from scratch</span>
+      <span>Rocky Linux 9.8 · Apache/MySQL/PHP</span>
+    </div>
+  </div>
+</footer>
 
 <script>
-const PROBLEMS = [
-  {
-    id: 1,
-    title: "홀수/짝수 사칙연산",
-    tag: "조건문",
-    desc: `두 정수에서, 한 개는 홀수(num1), 나머지 한 개는 짝수(num2)일 때
-사칙 연산(+, -, *, /)을 계산하여 출력하시오.
+(function(){
+  "use strict";
 
-- args[0]: 홀수, args[1]: 짝수
-- num1 % 2 == 1 && num2 % 2 == 0 일 때만 출력`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        int num1 = Integer.parseInt(args[0]);
-        int num2 = Integer.parseInt(args[1]);
-        if (num1 % 2 == 1 && num2 % 2 == 0) {
-            System.out.println(num1 + num2);
-            System.out.println(num1 - num2);
-            System.out.println(num1 * num2);
-            System.out.println(num1 / num2);
-        }
-    }
-}`,
-    hint: "args[]로 입력받고, if 조건문으로 홀수/짝수 체크 후 사칙연산 출력"
-  },
-  {
-    id: 2,
-    title: "매개변수 사칙연산 (switch)",
-    tag: "switch",
-    desc: `매개변수로 "3 + 4" 형태로 입력받은 후, switch를 사용하여 사칙연산 결과를 출력하시오.
+  /* ---------- 테마 (라이트/다크) ---------- */
+  var root = document.documentElement;
+  function savedTheme(){ try { return localStorage.getItem("theme"); } catch(e){ return null; } }
+  function apply(t){ if(t){ root.setAttribute("data-theme", t); } else { root.removeAttribute("data-theme"); } }
+  apply(savedTheme());
+  document.getElementById("themeBtn").addEventListener("click", function(){
+    var cur = root.getAttribute("data-theme");
+    if(!cur){ cur = matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"; }
+    var next = cur === "dark" ? "light" : "dark";
+    apply(next);
+    try { localStorage.setItem("theme", next); } catch(e){}
+  });
 
-- args[0]: 첫 번째 정수
-- args[1]: 연산자 (+, -, *, /)
-- args[2]: 두 번째 정수
-- 출력 형식: result = 7`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        int num1 = Integer.parseInt(args[0]);
-        String operator = args[1];
-        int num2 = Integer.parseInt(args[2]);
-        int result = switch (operator) {
-            case "+" -> num1 + num2;
-            case "-" -> num1 - num2;
-            case "*" -> num1 * num2;
-            case "/" -> num1 / num2;
-            default -> -1;
-        };
-        System.out.println("result = " + result);
-    }
-}`,
-    hint: "args[1]로 연산자 String을 받고, switch expression(->)으로 처리"
-  },
-  {
-    id: 3,
-    title: "월 이름 출력 (switch)",
-    tag: "switch",
-    desc: `매개변수로 숫자(0~11)를 입력받아 switch를 사용하여 월의 영어 이름을 출력하시오.
-
-- 0 → January, 1 → February, ..., 11 → December
-- 그 외 → ???
-- 출력 형식: Season = January`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        int seasonCode = Integer.parseInt(args[0]);
-        String seasonname = switch (seasonCode) {
-            case 0 -> "January";
-            case 1 -> "February";
-            case 2 -> "March";
-            case 3 -> "April";
-            case 4 -> "May";
-            case 5 -> "June";
-            case 6 -> "July";
-            case 7 -> "August";
-            case 8 -> "September";
-            case 9 -> "October";
-            case 10 -> "November";
-            case 11 -> "December";
-            default -> "???";
-        };
-        System.out.println("Season = " + seasonname);
-    }
-}`,
-    hint: "switch expression으로 0~11 각 case에 월 이름 매핑"
-  },
-  {
-    id: 4,
-    title: "문자열 처리 — 자기소개 출력",
-    tag: "String",
-    desc: `args로 이름(String), 나이(int), 목표나이(int)를 입력받아 아래 형식으로 출력하시오.
-
-출력 예시:
-안녕하세요, 제 이름은 홍길동 이고, 나이는 20입니다. 내년에는 21 살이 됩니다!`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        String name = args[0];
-        int age = Integer.parseInt(args[1]);
-        int goal = Integer.parseInt(args[2]);
-        System.out.println("안녕하세요, 제 이름은 " + name + " 이고, 나이는 " + age + "입니다. 내년에는 " + goal + " 살이 됩니다!");
-    }
-}`,
-    hint: "args[0]은 String 그대로, args[1]과 args[2]는 parseInt로 변환"
-  },
-  {
-    id: 5,
-    title: "문자열 처리 — 이메일 파싱",
-    tag: "String",
-    desc: `이메일 주소 "java_user@cju.ac.kr" 에서 @ 앞부분(username)만 추출하여 출력하시오.
-
-- indexOf()로 @ 위치 찾기
-- substring()으로 앞부분 추출
-- 출력: java_user`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        String email = "java_user@cju.ac.kr";
-        int position = email.indexOf("@");
-        String username = email.substring(0, position);
-        System.out.println(username);
-    }
-}`,
-    hint: "indexOf()로 @의 인덱스를 구하고, substring(0, position)으로 잘라내기"
-  },
-  {
-    id: 6,
-    title: "문자열 처리 — 패스워드 비교",
-    tag: "String",
-    desc: `두 패스워드 문자열을 비교하여 일치 여부를 출력하시오.
-
-- pass1 = "abcde", pass2 = "abcde"
-- 주의: 문자열 비교 시 == 와 equals()의 차이를 고려하시오
-- 일치하면 "패스워드가 일치합니다.", 아니면 "패스워드가 불일치합니다."`,
-    answer: `public class Main {
-    public static void main(String[] args) {
-        String pass1 = "abcde";
-        String pass2 = "abcde";
-        if (pass1.equals(pass2)) {
-            System.out.println("패스워드가 일치합니다.");
-        } else {
-            System.out.println("패스워드가 불일치합니다.");
-        }
-    }
-}`,
-    hint: "String 비교는 == 가 아니라 .equals()를 써야 정확합니다!"
-  },
-  {
-    id: 7,
-    title: "조건문 — 5의 배수 판별",
-    tag: "조건문",
-    desc: `Scanner로 정수 하나를 입력받아 5의 배수인지 확인하여 출력하시오.
-
-- % 연산자 사용 필수
-- 5의 배수면 "5의 배수 입니다.", 아니면 "5의 배수가 아닙니다."`,
-    answer: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("정수 입력 :");
-        int num = sc.nextInt();
-        if (num % 5 == 0) {
-            System.out.println("5의 배수 입니다.");
-        } else {
-            System.out.println("5의 배수가 아닙니다.");
-        }
-    }
-}`,
-    hint: "Scanner import 필수, sc.nextInt()로 입력, % 5 == 0 으로 판별"
-  },
-  {
-    id: 8,
-    title: "조건문 — 학점 출력",
-    tag: "조건문",
-    desc: `Scanner로 0~4.5 사이의 실수 점수를 입력받아 학점을 출력하시오.
-
-- 4.0 이상 → A
-- 3.0 이상 → B
-- 2.0 이상 → C
-- 그 외 → F`,
-    answer: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("학점 입력 :");
-        double num = sc.nextDouble();
-        if (num >= 4.0) {
-            System.out.println("A");
-        } else if (num >= 3.0) {
-            System.out.println("B");
-        } else if (num >= 2.0) {
-            System.out.println("C");
-        } else {
-            System.out.println("F");
-        }
-    }
-}`,
-    hint: "실수 입력은 double + sc.nextDouble(), if-else if 체인으로 구현"
-  },
-  {
-    id: 9,
-    title: "조건문 — 버스 요금 계산",
-    tag: "조건문",
-    desc: `Scanner로 나이를 입력받아 버스 요금을 출력하시오.
-
-- 8세 미만 또는 65세 이상 → 무료
-- 8세 이상 ~ 19세 이하 → 700원
-- 20세 이상 ~ 64세 이하 → 1200원`,
-    answer: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("나이 입력 :");
-        int age = sc.nextInt();
-        if (age >= 65 || age < 8) {
-            System.out.println("무료");
-        } else if (age >= 8 && age < 20) {
-            System.out.println("700원");
-        } else {
-            System.out.println("1200원");
-        }
-    }
-}`,
-    hint: "|| (또는) 조건으로 무료 범위 처리, else if로 청소년/성인 구분"
-  },
-  {
-    id: 10,
-    title: "반복문 — 1~9 숫자만 입력받기",
-    tag: "반복문",
-    desc: `while문을 사용하여 사용자가 1~9 사이의 숫자를 올바르게 입력할 때까지 반복하시오.
-
-- 범위를 벗어나면 "[경고] 범위를 벗어났습니다. 다시 시도해주세요." 출력
-- 성공하면 "성공! 올바르게 입력하신 숫자는 N입니다." 출력`,
-    answer: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int num = 0;
-        while (num < 1 || num > 9) {
-            System.out.println("1부터 9 사이의 숫자를 입력하세요:");
-            num = scanner.nextInt();
-            if (num < 1 || num > 9) {
-                System.out.print("[경고] 범위를 벗어났습니다. 다시 시도해주세요.\n\n");
-            }
-        }
-        System.out.println("성공! 올바르게 입력하신 숫자는 " + num + "입니다.");
-    }
-}`,
-    hint: "while 조건을 (num < 1 || num > 9)로 설정, 루프 안에서 재입력받기"
-  },
-  {
-    id: 11,
-    title: "반복문 — 5x5 보물 지도",
-    tag: "이중 반복문",
-    desc: `Scanner로 보물의 행(row)과 열(col) 위치(1~5)를 입력받고, 5x5 지도를 출력하시오.
-
-- 보물 위치는 [★], 나머지는 [ ]로 표시
-- while문 중첩(이중 반복문) 사용
-- 출력 예시 (row=2, col=3):
-  [ ][ ][★][ ][ ]`,
-    answer: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("보물의 위치를 설정합니다. (1 ~ 5 사이)");
-        System.out.println("보물의 행(Row)위치");
-        int targetRow = sc.nextInt();
-        System.out.println("보물의 열(Col) 위치");
-        int targetCol = sc.nextInt();
-        System.out.println(" === 5 x 5 보물 지도");
-        int row = 1;
-        while (row <= 5) {
-            int col = 1;
-            while (col <= 5) {
-                if (row == targetRow && col == targetCol) {
-                    System.out.print("[★]");
-                } else {
-                    System.out.print("[ ]");
-                }
-                col++;
-            }
-            System.out.println();
-            row++;
-        }
-        sc.close();
-    }
-}`,
-    hint: "while 안에 while (이중 반복문), 행 루프 끝에 println()으로 줄바꿈"
+  /* ---------- 시계 (KST) ---------- */
+  var clock = document.getElementById("clock");
+  function tick(){
+    try {
+      var s = new Date().toLocaleTimeString("ko-KR", { hour12:false, timeZone:"Asia/Seoul" });
+      clock.textContent = s;
+    } catch(e){ clock.textContent = new Date().toLocaleTimeString(); }
   }
-];
+  tick(); setInterval(tick, 1000);
+  document.getElementById("year").textContent = new Date().getFullYear();
 
-let currentProblem = null;
-let answerVisible = {};
-let feedbackState = {};
-
-function renderList() {
-  const list = document.getElementById('problem-list');
-  list.innerHTML = PROBLEMS.map(p => `
-    <div class="problem-item ${currentProblem?.id === p.id ? 'active' : ''} ${feedbackState[p.id] === 'ok' ? 'done-ok' : feedbackState[p.id] === 'fail' ? 'done-fail' : ''}"
-         onclick="selectProblem(${p.id})">
-      <span class="prob-num">${String(p.id).padStart(2,'0')}</span>
-      <span class="prob-title">${p.title}</span>
-      <span class="prob-tag">${p.tag}</span>
-      <span class="prob-status">
-        ${feedbackState[p.id] === 'ok' ? '✅' : feedbackState[p.id] === 'fail' ? '❌' : feedbackState[p.id] === 'partial' ? '🟡' : ''}
-      </span>
-    </div>
-  `).join('');
-}
-
-function selectProblem(id) {
-  currentProblem = PROBLEMS.find(p => p.id === id);
-  renderList();
-  renderCard();
-  document.getElementById('problem-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function renderCard() {
-  const p = currentProblem;
-  if (!p) return;
-  const card = document.getElementById('problem-card');
-  card.className = 'problem-card show';
-  card.innerHTML = `
-    <div class="card-header">
-      <span class="card-badge">문제 ${String(p.id).padStart(2,'0')} · ${p.tag}</span>
-      <span class="card-title">${p.title}</span>
-    </div>
-    <div class="problem-desc">${p.desc}</div>
-
-    <div class="editor-label">✏️ 여기에 코드를 직접 작성하세요 <span>(Tab키 = 들여쓰기)</span></div>
-    <textarea class="code-editor" id="code-input-${p.id}" placeholder="public class Main {&#10;    public static void main(String[] args) {&#10;        // 여기에 코드 작성&#10;    }&#10;}" spellcheck="false"></textarea>
-    <div class="tab-hint">💡 Tab 키를 누르면 4칸 들여쓰기, Shift+Tab은 내어쓰기</div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-check-${p.id}" onclick="checkCode(${p.id})">🤖 AI 채점하기</button>
-      <button class="btn btn-answer" onclick="toggleAnswer(${p.id})">📋 모범답안 보기</button>
-      <button class="btn btn-ghost" onclick="clearCode(${p.id})">초기화</button>
-    </div>
-
-    <div class="feedback-box" id="feedback-${p.id}"></div>
-    <div class="answer-box ${answerVisible[p.id] ? 'show' : ''}" id="answer-${p.id}">
-      <div class="answer-label">📋 모범답안</div>
-      <pre class="answer-code">${escHtml(p.answer)}</pre>
-    </div>
-  `;
-
-  // Tab key handler
-  const editor = document.getElementById(`code-input-${p.id}`);
-  editor.addEventListener('keydown', function(e) {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      if (e.shiftKey) {
-        const lineStart = this.value.lastIndexOf('\n', start - 1) + 1;
-        if (this.value.substring(lineStart, lineStart + 4) === '    ') {
-          this.value = this.value.substring(0, lineStart) + this.value.substring(lineStart + 4);
-          this.selectionStart = this.selectionEnd = start - 4;
+  /* ---------- 내비 현재 위치 표시 ---------- */
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a[href^='#']"));
+  var sections = navLinks.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          navLinks.forEach(function(a){ a.classList.remove("active"); });
+          var i = sections.indexOf(en.target);
+          if(i>=0 && navLinks[i]) navLinks[i].classList.add("active");
         }
-      } else {
-        this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
-        this.selectionStart = this.selectionEnd = start + 4;
-      }
-    }
-  });
+      });
+    }, { rootMargin:"-45% 0px -50% 0px" });
+    sections.forEach(function(s){ if(s) io.observe(s); });
+  }
 
-  // Restore saved code
-  const saved = localStorage.getItem ? (localStorage.getItem(`code_${p.id}`) || '') : '';
-  if (saved) editor.value = saved;
+  /* ---------- GitHub 프로젝트 자동 로드 ---------- */
+  var reposEl = document.getElementById("repos");
+  var noteEl = document.getElementById("reposNote");
+  var GH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>';
+  var ARROW = '<span class="arrow" aria-hidden="true">↗</span>';
 
-  // Auto-save
-  editor.addEventListener('input', function() {
-    try { localStorage.setItem(`code_${p.id}`, this.value); } catch(e) {}
-  });
-}
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function clearCode(id) {
-  const editor = document.getElementById(`code-input-${id}`);
-  if (editor) editor.value = '';
-  try { localStorage.removeItem(`code_${id}`); } catch(e) {}
-  document.getElementById(`feedback-${id}`).className = 'feedback-box';
-  document.getElementById(`feedback-${id}`).innerHTML = '';
-}
-
-function toggleAnswer(id) {
-  answerVisible[id] = !answerVisible[id];
-  const box = document.getElementById(`answer-${id}`);
-  if (box) box.className = 'answer-box ' + (answerVisible[id] ? 'show' : '');
-}
-
-async function checkCode(id) {
-  const p = PROBLEMS.find(x => x.id === id);
-  const editor = document.getElementById(`code-input-${id}`);
-  const userCode = editor?.value?.trim();
-  if (!userCode) { alert('코드를 먼저 작성해주세요!'); return; }
-
-  const fbBox = document.getElementById(`feedback-${id}`);
-  const btn = document.getElementById(`btn-check-${id}`);
-  btn.disabled = true;
-
-  fbBox.className = 'feedback-box show';
-  fbBox.innerHTML = `
-    <div class="feedback-header loading">
-      <span class="spinner"></span> AI가 코드를 분석하고 있어요...
-    </div>
-    <div class="feedback-body" style="color:var(--muted)">잠시만 기다려주세요.</div>
-  `;
-
-  const prompt = `당신은 Java 프로그래밍 강사입니다. 학생이 작성한 Java 코드를 꼼꼼히 채점해주세요.
-
-[문제]
-${p.title}
-
-[문제 설명]
-${p.desc}
-
-[모범답안]
-\`\`\`java
-${p.answer}
-\`\`\`
-
-[학생 코드]
-\`\`\`java
-${userCode}
-\`\`\`
-
-다음 기준으로 분석해주세요:
-
-1. **전체 판정**: 정답 / 부분 정답 / 오답 중 하나로 시작
-2. **논리 오류**: 알고리즘이나 조건문 로직이 잘못된 부분
-3. **문법 오류**: 세미콜론 누락, 괄호 오류, 타입 선언 등
-4. **Java 특이사항**: String 비교, import 누락, 타입 불일치 등
-5. **개선 제안**: 더 좋은 방법이 있다면 간단히
-
-손코딩 시험 기준으로 엄격하게, 하지만 친절하게 피드백해주세요.
-줄 번호를 언급할 때는 "X번째 줄"처럼 구체적으로 알려주세요.
-한국어로 답변해주세요.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+  fetch("https://api.github.com/users/hkacedia/repos?sort=updated&per_page=100")
+    .then(function(r){ if(!r.ok) throw new Error("gh "+r.status); return r.json(); })
+    .then(function(list){
+      if(!Array.isArray(list) || !list.length) throw new Error("empty");
+      list = list.filter(function(r){ return !r.fork; })
+                 .sort(function(a,b){ return (b.stargazers_count-a.stargazers_count) || (new Date(b.updated_at)-new Date(a.updated_at)); })
+                 .slice(0,6);
+      reposEl.innerHTML = list.map(function(r){
+        var lang = r.language ? '<span class="lang"><i></i>'+esc(r.language)+'</span>' : '';
+        var star = r.stargazers_count ? '<span>★ '+r.stargazers_count+'</span>' : '';
+        var upd = new Date(r.updated_at).toLocaleDateString("ko-KR", {year:"2-digit",month:"2-digit",day:"2-digit"});
+        return '<a class="repo" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'
+          + '<div class="top">'+GH_ICON+'<span class="name">'+esc(r.name)+'</span>'+ARROW+'</div>'
+          + '<p class="desc">'+(r.description?esc(r.description):'<span style="opacity:.6">설명이 아직 없어요.</span>')+'</p>'
+          + '<div class="meta">'+lang+star+'<span>'+upd+' 업데이트</span></div>'
+          + '</a>';
+      }).join("");
+      noteEl.textContent = "github.com/hkacedia 에서 실시간으로 불러옵니다.";
+    })
+    .catch(function(){
+      reposEl.innerHTML = '<a class="repo" href="https://github.com/hkacedia" target="_blank" rel="noopener">'
+        + '<div class="top">'+GH_ICON+'<span class="name">github.com/hkacedia</span>'+ARROW+'</div>'
+        + '<p class="desc">GitHub에서 프로젝트를 직접 확인해 주세요. (목록을 잠시 불러오지 못했어요 — API 요청 한도일 수 있어요.)</p>'
+        + '<div class="meta"><span>바로가기</span></div></a>';
+      noteEl.textContent = "";
     });
 
-    const data = await res.json();
-    const text = data.content?.map(c => c.text || '').join('') || '응답을 받지 못했습니다.';
+  /* ---------- 방명록 (지금은 localStorage 미리보기) ----------
+     나중에 이 두 함수(loadEntries / saveEntry)만 Supabase 호출로 바꾸면
+     실제 DB에 저장되고 모두에게 보이는 방명록이 됩니다. */
+  var KEY = "guestbook_v1";
+  var listEl = document.getElementById("gbList");
 
-    const isOk = text.includes('정답') && !text.includes('오답') && !text.includes('부분 정답');
-    const isPartial = text.includes('부분 정답');
-    const statusClass = isOk ? 'ok' : isPartial ? 'partial' : 'fail';
-    const statusIcon = isOk ? '✅ 정답입니다!' : isPartial ? '🟡 부분 정답' : '❌ 오답 또는 수정 필요';
-
-    feedbackState[id] = statusClass;
-    renderList();
-
-    fbBox.innerHTML = `
-      <div class="feedback-header ${statusClass}">${statusIcon}</div>
-      <div class="feedback-body">${escHtml(text)}</div>
-    `;
-  } catch (err) {
-    fbBox.innerHTML = `
-      <div class="feedback-header fail">⚠️ 오류 발생</div>
-      <div class="feedback-body">AI 연결에 실패했습니다. 잠시 후 다시 시도해주세요.\n${err.message}</div>
-    `;
+  function loadEntries(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(e){ return []; }
   }
+  function saveEntries(arr){
+    try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){}
+  }
+  function fmt(ts){
+    var d = new Date(ts);
+    try { return d.toLocaleString("ko-KR", {month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+    catch(e){ return ""; }
+  }
+  function render(){
+    var arr = loadEntries();
+    if(!arr.length){ listEl.innerHTML = '<p class="gb-empty">아직 방명록이 비어 있어요. 첫 글을 남겨보세요.</p>'; return; }
+    listEl.innerHTML = arr.map(function(e){
+      return '<div class="gb-entry"><div class="head"><span class="who">'+esc(e.name)+'</span>'
+        + '<span class="when">'+fmt(e.ts)+'</span></div>'
+        + '<p class="msg">'+esc(e.message)+'</p></div>';
+    }).join("");
+  }
+  // 처음 방문이면 샘플 하나 (실제 예시임을 알 수 있게)
+  (function seed(){
+    if(loadEntries().length) return;
+    saveEntries([{ name:"현규", message:"직접 세운 서버 위에 올린 첫 페이지. 방명록 곧 진짜로 연결할게요.", ts:Date.now() }]);
+  })();
+  render();
 
-  btn.disabled = false;
-}
+  document.getElementById("gbForm").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var name = document.getElementById("gbName").value.trim() || "방문자";
+    var msg = document.getElementById("gbMsg").value.trim();
+    if(!msg) return;
+    var arr = loadEntries();
+    arr.unshift({ name:name.slice(0,20), message:msg.slice(0,300), ts:Date.now() });
+    saveEntries(arr.slice(0,100));
+    this.reset();
+    render();
+    document.getElementById("gbHint").textContent = "남겨주셔서 고마워요! (이 브라우저에 저장됐어요)";
+  });
 
-// Init
-renderList();
+})();
 </script>
 </body>
 </html>
